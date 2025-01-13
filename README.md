@@ -1,4 +1,4 @@
-#Brute_Force_Admin_Fonctionnal
+#Brute_Force_Admin_Fonctionnal by 3xtr3mX ⚔️💻
 
 🚨 Description
 Welcome to the ultimate brute-force tool, Brute_Force_Admin_Fonctionnal! This Python script is designed to test admin passwords for penetration testing purposes. Use this code wisely... or not, at your own risk 😈
